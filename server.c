@@ -94,8 +94,7 @@ int handleClientActivity(int clientSd, int clientSdIndex) {
 
   addrlen = sizeof(ADDRESS);
 
-  if ((valread = read(clientSd, buffer, 1024)) == 0)
-  {
+  if ((valread = read(clientSd, buffer, 1024)) == -1) {
       printf("Closing client %d\n", clientSd);
       close(clientSd);
       CLIENTS[clientSdIndex] = 0;
@@ -114,7 +113,7 @@ int listenForConnection(int serverSocket) {
   fd_set readfds;
   int maxSd, sd, i, activity;
 
-  while (TRUE) {
+  while(TRUE) {
     FD_ZERO(&readfds);
 
     //add master socket to set
@@ -127,12 +126,14 @@ int listenForConnection(int serverSocket) {
         sd = CLIENTS[i];
 
         //if valid socket descriptor then add to read list
-        if(sd > 0)
-            FD_SET( sd , &readfds);
+        if(sd > 0) {
+          FD_SET( sd , &readfds);
+        }
 
         //highest file descriptor number, need it for the select function
-        if(sd > maxSd)
-            maxSd = sd;
+        if(sd > maxSd) {
+          maxSd = sd;
+        }
     }
 
     activity = select(maxSd + 1 , &readfds , NULL , NULL , NULL);
@@ -148,7 +149,7 @@ int listenForConnection(int serverSocket) {
     for (i = 0; i < MAX_CLIENTS; i++) {
         sd = CLIENTS[i];
 
-        if (FD_ISSET( sd , &readfds)) {
+        if (FD_ISSET(sd , &readfds)) {
           handleClientActivity(sd, i);
         }
     }
